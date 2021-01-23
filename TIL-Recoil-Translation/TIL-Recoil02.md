@@ -27,3 +27,30 @@ Atoms는 디버깅, 영속성, 그리고 모든 atoms의 지도를 볼 수 있�
 
 컴포넌트에서 atom을 읽고 쓰기 위해서는 useRecoilState 라는 hook을 사용합니다. 이는 리액트의 useState와 같지만, 컴포넌트 사이에서 상태를 공유할 수 있습니다.
 
+```React
+function FontButtom() {
+	const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+	return (
+  	<button onClick={() => setFontSize((size) => size + 1)} style={{fontSize}}>
+			Click to Enlarge
+    </button>
+  );
+}
+```
+
+버튼을 클릭하는 것은 버튼의 글씨 크기를 하나씩 증가시킵니다. 하지만 이제 다른 컴포넌트들도 같은 폰트 사이즈를 사용할 수 있습니다.
+
+```react
+function Text() {
+  const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+  return <p style={{fontSize}}>This text will incereate in size too</p>;
+}
+```
+
+## 선택자
+
+---
+
+선택자는 atoms나 다른 선택자들을 인풋으로 받는 순수 함수입니다. 이러한 상류 atoms 혹은 선택자들이 업데이트 되면, 선택자 함수는 재평가 됩니다. 컴포넌트들은 선택자를 atoms과 같이 구독할 수 있고, 선택자들이 바뀌면 리렌더링 될 겁니다.
+
+선택자들은 상태에 기반한 파생 데이터를 계산하기 위해 사용됩니다. 이러한 기능은 최소한의 상태들이 atoms에 저장되어 있으므로 불필요한 상태들을 가지는 것을 피할수 있게 해줍니다.
