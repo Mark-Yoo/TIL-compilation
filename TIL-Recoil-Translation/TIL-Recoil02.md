@@ -54,3 +54,21 @@ function Text() {
 선택자는 atoms나 다른 선택자들을 인풋으로 받는 순수 함수입니다. 이러한 상류 atoms 혹은 선택자들이 업데이트 되면, 선택자 함수는 재평가 됩니다. 컴포넌트들은 선택자를 atoms과 같이 구독할 수 있고, 선택자들이 바뀌면 리렌더링 될 겁니다.
 
 선택자들은 상태에 기반한 파생 데이터를 계산하기 위해 사용됩니다. 이러한 기능은 최소한의 상태들이 atoms에 저장되어 있으므로 불필요한 상태들을 가지는 것을 피할수 있게 해줍니다.
+
+컴포넌트의 관점에서 선택자와 atoms는 같은 인터페이스를 가지면서 서로의 대체제가 되는 것도 가능합니다.
+
+선택자는 selector 함수를 사용하여 정의합니다.
+
+```react
+const fontSizeLabelState = selector({
+  key: 'fontSizeLabelState',
+  get: ({get}) => {
+    const fontSize = get(fontSizeState);
+    const unit = 'px';
+    
+    return `${fontSize}${unit}`;
+  },
+});
+```
+
+get 프로퍼티가 입력될 함수이며 이는 atoms의 값과 다른 선택자에 전달된 get 인자를 사용하여 접근 할 수 있습니다.
