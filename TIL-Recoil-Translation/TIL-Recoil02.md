@@ -25,7 +25,7 @@ const fontSizeState = atom({
 
 Atoms는 디버깅, 영속성, 그리고 모든 atoms의 지도를 볼 수 있게 해주는 일부의 선진 API에 사용되는 고유한 키를 필요로 합니다. 두 atom이 같은 키를 갖는 것은 잘못된 것이므로 이 키들은 전역에서도 고유해야만 합니다. 리액트 컴포넌트의 상태처럼 atoms도 기본값을 가집니다.
 
-컴포넌트에서 atom을 읽고 쓰기 위해서는 useRecoilState 라는 hook을 사용합니다. 이는 리액트의 useState와 같지만, 컴포넌트 사이에서 상태를 공유할 수 있습니다.
+컴포넌트에서 atom을 읽고 쓰기 위해서는 `useRecoilState` 라는 hook을 사용합니다. 이는 리액트의 `useState`와 같지만, 컴포넌트 사이에서 상태를 공유할 수 있습니다.
 
 ```React
 function FontButtom() {
@@ -71,4 +71,9 @@ const fontSizeLabelState = selector({
 });
 ```
 
-get 프로퍼티가 입력될 함수이며 이는 atoms의 값과 다른 선택자에 전달된 get 인자를 사용하여 접근 할 수 있습니다.
+`get` 프로퍼티가 입력될 함수이며 이는 atoms의 값과 다른 선택자에 전달된 `get` 인자를 사용하여 접근 할 수 있습니다. 다른 atom이나 선택자에 접근할 때마다, 다른 atom이나 선택자를 업데이트 하는 것이 이것을 다시 계산하게 만드는 의존성 관계가 형성됩니다.
+
+이 `fontSizeLabelState` 예시를 보면, 선택자는 하나의 의존성을 갖습니다: `fontSizeState` atom이다. 개념적으로 `fontSizeLabelState` 선택자는 `fontSizeState`를 입력으로 받고 정형화된 font size 라벨을 출력하는 순수함수처럼 동작합니다.
+
+선택자는 atom이나 선택자를 인자로 받고 이에 상응하는 값을 리턴하는 `useRecoilValue()`를 사용해서 읽을 수 있습니다. `useRecoilState()`는 `fontSizeLabelState` 선택자가 writable 속성이 아니어서 사용하지 않습니다. (writable 선택자에 대하여 정보를 더 원하신다면 [API reference](https://recoiljs.org/docs/api-reference/core/selector) 를 확인해주세요.)
+
