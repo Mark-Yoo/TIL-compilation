@@ -77,3 +77,21 @@ const fontSizeLabelState = selector({
 
 선택자는 atom이나 선택자를 인자로 받고 이에 상응하는 값을 리턴하는 `useRecoilValue()`를 사용해서 읽을 수 있습니다. `useRecoilState()`는 `fontSizeLabelState` 선택자가 writable 속성이 아니어서 사용하지 않습니다. (writable 선택자에 대하여 정보를 더 원하신다면 [API reference](https://recoiljs.org/docs/api-reference/core/selector) 를 확인해주세요.)
 
+``````react
+function FontButton() {
+  const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+  const fontSizeBLabel = useRecoilValue(fontSizeLabelState);
+  
+  return (
+  	<>
+    	<div>Current font size: {fontSizeLabel}</div>
+    
+   		<button onClick={() => setFontSize(fontSize + 1)} style= {{fontSize}}>
+    		Click to Enlarge
+    	</button>
+    <>
+  );
+}
+``````
+
+이제 버튼을 누르면 두 가지 기능을 합니다: 폰트의 사이즈를 키우면서 현재 폰트 사이즈를 반영하기 위해서 font size label을 업데이트 합니다.
