@@ -4,9 +4,9 @@
 
 ## Overview
 
-Recoil은 atoms(공유된 상태)에서부터 선택자(순수 함수)까지의 흐르는 데이터 플로우 그래프를 만들게 해주고 이를 당신의 리액트 컴포넌트들로 흐르도록 해줍니다.
+Recoil은 atoms(공유된 상태)에서부터 Selector(순수 함수)까지의 흐르는 데이터 플로우 그래프를 만들게 해주고 이를 당신의 리액트 컴포넌트들로 흐르도록 해줍니다.
 
-Atoms는 컴포넌트들이 볼 수 있는 '상태의 구성단위'입니다. 선택자들은 이 상태를 동기적으로든, 비동기적으로든 바꿀 수 있습니다.
+Atoms는 컴포넌트들이 볼 수 있는 '상태의 구성단위'입니다. Selector들은 이 상태를 동기적으로든, 비동기적으로든 바꿀 수 있습니다.
 
 ---
 
@@ -47,11 +47,11 @@ function Text() {
 }
 ```
 
-## 선택자
+## Selectors
 
 ---
 
-선택자는 atoms나 다른 선택자들을 인풋으로 받는 순수 함수입니다. 이러한 상류 atoms 혹은 선택자들이 업데이트 되면, 선택자 함수는 재평가 됩니다. 컴포넌트들은 선택자를 atoms과 같이 구독할 수 있고, 선택자들이 바뀌면 리렌더링 될 겁니다.
+Selector는 atoms나 다른 Selector들을 인풋으로 받는 순수 함수입니다. 이러한 상류 atoms 혹은 Selector들이 업데이트 되면, Selector 함수는 재평가 됩니다. 컴포넌트들은 선택자를 atoms과 같이 구독할 수 있고, Selector들이 바뀌면 리렌더링 될 겁니다.
 
 선택자들은 상태에 기반한 파생 데이터를 계산하기 위해 사용됩니다. 이러한 기능은 최소한의 상태들이 atoms에 저장되어 있으므로 불필요한 상태들을 가지는 것을 피할수 있게 해줍니다.
 
@@ -75,7 +75,7 @@ const fontSizeLabelState = selector({
 
 이 `fontSizeLabelState` 예시를 보면, 선택자는 하나의 의존성을 갖습니다: `fontSizeState` atom이다. 개념적으로 `fontSizeLabelState` 선택자는 `fontSizeState`를 입력으로 받고 정형화된 font size 라벨을 출력하는 순수함수처럼 동작합니다.
 
-선택자는 atom이나 선택자를 인자로 받고 이에 상응하는 값을 리턴하는 `useRecoilValue()`를 사용해서 읽을 수 있습니다. `useRecoilState()`는 `fontSizeLabelState` 선택자가 writable 속성이 아니어서 사용하지 않습니다. (writable 선택자에 대하여 정보를 더 원하신다면 [API reference](https://recoiljs.org/docs/api-reference/core/selector) 를 확인해주세요.)
+Selector는 atom이나 선택자를 인자로 받고 이에 상응하는 값을 리턴하는 `useRecoilValue()`를 사용해서 읽을 수 있습니다. `useRecoilState()`는 `fontSizeLabelState` Selector가 writable 속성이 아니어서 사용하지 않습니다. (writable Selector에 대하여 정보를 더 원하신다면 [API reference](https://recoiljs.org/docs/api-reference/core/selector) 를 확인해주세요.)
 
 ``````react
 function FontButton() {
@@ -95,3 +95,4 @@ function FontButton() {
 ``````
 
 이제 버튼을 누르면 두 가지 기능을 합니다: 폰트의 사이즈를 키우면서 현재 폰트 사이즈를 반영하기 위해서 font size label을 업데이트 합니다.
+
