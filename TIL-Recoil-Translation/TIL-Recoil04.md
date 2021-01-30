@@ -55,3 +55,70 @@ function App() {
 
 ## Atom
 
+Atom은 **상태의 조각**을 대표합니다. Atoms는 어떤 컴포넌트에서든 읽고 쓸 수 있습니다. Atom의 값을 읽을 수 있는 컴포넌트는 내재적으로 그 atom을 구독하고 있습니다. 그러므로 atom에서 어떠한 업데이트가 발생하게 되면 atom을 구독하고 있는 컴포넌트에 리렌더링을 발생시킵니다.
+
+```react
+const textState = atom({
+  key: 'textState', // unique ID (with respect to other atoms/selectors)
+  default: '', // default value (aka initial value)
+});
+```
+
+atom에 읽고 쓰기 위한 컴포넌트는 다음과 같이 `useRecoilState()`를 사용하여야 합니다:
+
+```react
+function CharacterCounter() {
+  return (
+    <div>
+      <TextInput />
+      <CharacterCount />
+    </div>
+  );
+}
+
+function TextInput() {
+  const [text, setText] = useRecoilState(textState);
+
+  const onChange = (event) => {
+    setText(event.target.value);
+  };
+
+  return (
+    <div>
+      <input type="text" value={text} onChange={onChange} />
+      <br />
+      Echo: {text}
+    </div>
+  );
+}
+```
+
+## Selector
+
+Selector는 **파생된 데이터**를 대표합니다. 파생된 데이터는 상태의 변환입니다. 파생된 데이터는 주어진 상태를 어떤식으로든 수정하는, 순수 함수에 전달된 상태의 아웃풋이라고 생각 할 수도 있습니다:
+
+```react
+const charCountState = selector({
+  key: 'charCountState', // unique ID (with respect to other atoms/selectors)
+  get: ({get}) => {
+    const text = get(textState);
+
+    return text.length;
+  },
+});
+```
+
+`useRecoilValue()` hook을 사용하여 `charCountState`의 값을 읽을 수 있습니다:
+
+```react
+function CharacterCount() {
+  const count = useRecoilValue(charCountState);
+
+  return <>Character Count: {count}</>;
+}
+```
+
+## Demo
+
+다음은 완성된 프로덕트입니다:
+
