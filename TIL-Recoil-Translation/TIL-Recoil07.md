@@ -97,3 +97,56 @@ function TodoListFilters() {
 - 완료되지 않은 아이템의 총 갯수
 - 완료된 아이템의 퍼센티지
 
+각 스탯마다 selector를 만들수도 있지만, 좀 더 쉬운 접근은 필요한 데이터를 포함하고 있는 객체를 리턴하는 하나의 selector를 사용하는 것입니다. 이 selector를 `todoListStatsState` 라고 부르겠습니다.
+
+```react
+const todoListStatsState = selector({
+  key: 'todoListStatsState',
+  get: ({get}) => {
+    const todoList = get(todoListState);
+    const totalNum = todoList.length;
+    const totalCompletedNum = todoList.filter((item) => item.isComplete).length;
+    const totalUncompletedNum = totalNum - totalCompletedNum;
+    const percentCompleted = totalNum === 0 ? 0 : totalCompletedNum / totalNum * 100;
+
+    return {
+      totalNum,
+      totalCompletedNum,
+      totalUncompletedNum,
+      percentCompleted,
+    };
+  },
+});
+```
+
+`todoListStatsState`의 값을 읽어오기 위해서 다시 한 번  `useRecoilValue()`를 사용하겠습니다.
+
+```react
+function TodoListStats() {
+  const {
+    totalNum,
+    totalCompletedNum,
+    totalUncompletedNum,
+    percentCompleted,
+  } = useRecoilValue(todoListStatsState);
+
+  const formattedPercentCompleted = Math.round(percentCompleted);
+
+  return (
+    <ul>
+      <li>Total items: {totalNum}</li>
+      <li>Items completed: {totalCompletedNum}</li>
+      <li>Items not completed: {totalUncompletedNum}</li>
+      <li>Percent completed: {formattedPercentCompleted}</li>
+    </ul>
+  );
+}
+```
+
+요악하자면 모든 요구사항을 충족하는 '할 일 리스트' 어플리케이션을 만들었습니다.
+
+- 할 일 아이템 추가
+- 할 일 아이템 수정
+- 할 일 아이템 삭제
+- 할 일 아이템 필터링
+- 유용한 수치들 표시
