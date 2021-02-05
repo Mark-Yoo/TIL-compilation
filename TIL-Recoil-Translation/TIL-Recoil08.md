@@ -148,3 +148,70 @@ function MyApp() {
 
 ## Data-Flow Graph
 
+쿼리를 selector로 모델링하면 상태와 파생된 상태, 그리고 쿼리를 혼합한 데이터 플로우 그래프를 만들 수 있습니다! 이 그래프는 상태가 업데이트 되면 리액트 컵포넌트를 업데이트하고 리렌더링합니다.
+
+다음 예시는 최근 유저의 이름과 그들의 친구 리스트를 렌더합니다. 만약 친구의 이름이 클릭되며, 그 이름이 최근 유저가 되며 이름과 리스트는 자동적으로 업데이트 될겁니다.
+
+```react
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: null,
+});
+
+const userInfoQuery = selectorFamily({
+  key: 'UserInfoQuery',
+  get: userID => async () => {
+    const response = await myDBQuery({userID});
+    if (response.error) {
+      throw response.error;
+    }
+    return response;
+  },
+});
+
+const currentUserInfoQuery = selector({
+  key: 'CurrentUserInfoQuery',
+  get: ({get}) => get(userInfoQuery(get(currentUserIDState))),
+});
+
+const friendsInfoQuery = selector({
+  key: 'FriendsInfoQuery',
+  get: ({get}) => {
+    const {friendList} = get(currentUserInfoQuery);
+    return friendList.map(friendID => get(userInfoQuery(friendID)));
+  },
+});
+
+function CurrentUserInfo() {
+  const currentUser = useRecoilValue(currentUserInfoQuery);
+  const friends = useRecoilValue(friendsInfoQuery);
+  const setCurrentUserID = useSetRecoilState(currentUserIDState);
+  return (
+    <div>
+      <h1>{currentUser.name}</h1>
+      <ul>
+        {friends.map(friend =>
+          <li key={friend.id} onClick={() => setCurrentUserID(friend.id)}>
+            {friend.name}
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}
+
+function MyApp() {
+  return (
+    <RecoilRoot>
+      <ErrorBoundary>
+        <React.Suspense fallback={<div>Loading...</div>}>
+          <CurrentUserInfo />
+        </React.Suspense>
+      </ErrorBoundary>
+    </RecoilRoot>
+  );
+}
+```
+
+## Concurrent Requests
+
