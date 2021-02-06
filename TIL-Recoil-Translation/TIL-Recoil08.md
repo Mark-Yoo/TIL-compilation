@@ -213,5 +213,86 @@ function MyApp() {
 }
 ```
 
-## Concurrent Requests
+## Concurrent Requests (동시 요청)
+
+위의 예시에서 눈치채셨는지 모르겠지만, `friendsInfoQuery` 는 쿼리를 이용하여 각 친구에 대한 자료를 받아옵니다. 하지만 이를 루프하는 것으로 기본적으로 직렬화됩니다. 검색이 빠르다면 그것도 괜찮습니다. 자원을 많이 사용한다면 [waitForAll](https://recoiljs.org/docs/api-reference/utils/waitForAll/)과 같은 concurrent helper를 사용하여 병렬로 돌릴 수 있습니다. 이 helper는 배열과 의존성이 담긴 네임드 객체를 허용합니다.
+
+```react
+const friendsInfoQuery = selector({
+  key: 'FriendsInfoQuery',
+  get: ({get}) => {
+    const {friendList} = get(currentUserInfoQuery);
+    const friends = get(waitForAll(
+      friendList.map(friendID => userInfoQuery(friendID))
+    ));
+    return friends;
+  },
+});
+```
+
+[waitForNone](https://recoiljs.org/docs/api-reference/utils/waitForNone/)을 사용하여 부분 데이터로 UI에 대해 증가하는 업데이트를 다룰 수 있습니다.
+
+```react
+const friendsInfoQuery = selector({
+  key: 'FriendsInfoQuery',
+  get: ({get}) => {
+    const {friendList} = get(currentUserInfoQuery);
+    const friendLoadables = get(waitForNone(
+      friendList.map(friendID => userInfoQuery(friendID))
+    ));
+    return friendLoadables
+      .filter(({state}) => state === 'hasValue')
+      .map(({contents}) => contents);
+  },
+});
+```
+
+## Pre-Fetching (미리 가져오기)
+
+성능 문제로 렌더링 이전에 받아오기를 시작하고 싶을 수 있습니다. 그 방법은 렌더링을 하면서 쿼리를 진행할 수 있습니다. React docs에서 몇 가지 예시를 찾을 수 있습니다. 이 패턴은 Recoil에서도 동작합니다.
+
+위의 예시를 바꿔 사용자가 유저계정을 바꾸기 위해서 버튼을 누르자마자 다음 유저 정보를 받아오기 시작하는 형태로 만들어봅시다.
+
+```react
+function CurrentUserInfo() {
+  const currentUser = useRecoilValue(currentUserInfoQuery);
+  const friends = useRecoilValue(friendsInfoQuery);
+
+  const changeUser = useRecoilCallback(({snapshot, set}) => userID => {
+    snapshot.getLoadable(userInfoQuery(userID)); // pre-fetch user info
+    set(currentUserIDState, userID); // change current user to start new render
+  });
+
+  return (
+    <div>
+      <h1>{currentUser.name}</h1>
+      <ul>
+        {friends.map(friend =>
+          <li key={friend.id} onClick={() => changeUser(friend.id)}>
+            {friend.name}
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}
+```
+
+## Query Default Atom Values (기본 Atom 값 쿼리)
+
+Atom을 사용하여 변경 가능한 로컬 상태를 나타내지만, seledtor를 사용하여 기본값을 쿼리하는 것이 일반적인 패턴입니다:
+
+```react
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: selector({
+    key: 'CurrentUserID/Default',
+    get: () => myFetchCurrentUserID(),
+  }),
+});
+```
+
+만약 양방향 데이터 동기화를 원한다면 [atom effects](https://recoiljs.org/docs/guides/atom-effects)를 고려해보는 것도 좋습니다.
+
+## Async Queries Without React Suspense (React Suspense 사용하지 않은 비동기 쿼리)
 
