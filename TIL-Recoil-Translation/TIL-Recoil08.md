@@ -314,4 +314,52 @@ function UserInfo({userID}) {
 
 ## Query Refresh (쿼리 새로고침)
 
-selector를 사용하여 데이터 쿼리를 모델링 할 때, selector 평가가 항상 주어진 상태에 대해서 일관적인 값을 제공해야 한다는 것을 기억해야 합니다. Selector는 다른 atom과 selector 상태들에서 파생되는 상태들을 대표합니다. 그러므로 selector 평가 함수들은 주어진 인풋에 관해서 여러번 캐시되고 실행되더라도 idempotent(멱등)해야 합니다.
+selector를 사용하여 데이터 쿼리를 모델링 할 때, selector 평가가 항상 주어진 상태에 대해서 일관적인 값을 제공해야 한다는 것을 기억해야 합니다. Selector는 다른 atom과 selector 상태들에서 파생되는 상태들을 대표합니다. 그러므로 selector 평가 함수들은 주어진 인풋에 관해서 여러번 캐시되고 실행되더라도 idempotent(멱등)해야 합니다. 실제로 단일 selector는 어플리케이션의 생명주기 동안 결과과 다양하게 나올거라 예상하는 쿼리에 사용되면 안됨을 의미합니다.
+
+변경가능한 데이터를 다루기위해서 몇 가지 패턴을 사용할 수 있습니다.
+
+### Use a Request ID (요청 ID 사용하기)
+
+Selector 평가는 인풋을 바탕으로 주어진 상태에 일관된 값을 제공해야합니다(종속된 상태, 혹은 패밀리 매개변수). 따라서 요청 ID를 패밀리 매개변수 혹은 쿼리에 대한 종속성으로 추가할 수 있습니다. 예를 들면 다음과 같습니다:
+
+```react
+const userInfoQueryRequestIDState = atomFamily({
+  key: 'UserInfoQueryRequestID',
+  default: 0,
+});
+
+const userInfoQuery = selectorFamily({
+  key: 'UserInfoQuery',
+  get: userID => async ({get}) => {
+    get(userInfoQueryRequestIDState(userID)); // Add request ID as a dependency
+    const response = await myDBQuery({userID});
+    if (response.error) {
+      throw response.error;
+    }
+    return response;
+  },
+});
+
+function useRefreshUserInfo(userID) {
+  setUserInfoQueryRequestID = useSetRecoilState(userInfoQueryRequestIDState(userID));
+  return () => {
+    setUserInfoQueryRequestID(requestID => requestID + 1);
+  };
+}
+
+function CurrentUserInfo() {
+  const currentUserID = useRecoilValue(currentUserIDState);
+  const currentUserInfo = useRecoilValue(userInfoQuery(currentUserID));
+  const refreshUserInfo = useRefreshUserInfo(currentUserID);
+
+  return (
+    <div>
+      <h1>{currentUser.name}</h1>
+      <button onClick={refreshUserInfo}>Refresh</button>
+    </div>
+  );
+}
+```
+
+### Use An Atom (Atom 사용하기)
+
