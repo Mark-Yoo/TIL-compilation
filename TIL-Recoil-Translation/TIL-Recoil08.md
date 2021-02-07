@@ -296,3 +296,22 @@ const currentUserIDState = atom({
 
 ## Async Queries Without React Suspense (React Suspense 사용하지 않은 비동기 쿼리)
 
+보류중인 비동기 selector를 다루기 위해서 React Suspense를 사용하는 것이 필수는 아닙니다. [useRecoilValueLoadable()](https://recoiljs.org/docs/api-reference/core/useRecoilValueLoadable) hook을 사용하여 렌더링 중 상태(status)를 확인할 수도 있습니다.
+
+```react
+function UserInfo({userID}) {
+  const userNameLoadable = useRecoilValueLoadable(userNameQuery(userID));
+  switch (userNameLoadable.state) {
+    case 'hasValue':
+      return <div>{userNameLoadable.contents}</div>;
+    case 'loading':
+      return <div>Loading...</div>;
+    case 'hasError':
+      throw userNameLoadable.contents;
+  }
+}
+```
+
+## Query Refresh (쿼리 새로고침)
+
+selector를 사용하여 데이터 쿼리를 모델링 할 때, selector 평가가 항상 주어진 상태에 대해서 일관적인 값을 제공해야 한다는 것을 기억해야 합니다. Selector는 다른 atom과 selector 상태들에서 파생되는 상태들을 대표합니다. 그러므로 selector 평가 함수들은 주어진 인풋에 관해서 여러번 캐시되고 실행되더라도 idempotent(멱등)해야 합니다.
