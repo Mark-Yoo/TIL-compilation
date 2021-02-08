@@ -363,3 +363,28 @@ function CurrentUserInfo() {
 
 ### Use An Atom (Atom 사용하기)
 
+또 다른 방법은 selector 대신 atom을 사용하여 쿼리 결과를 모델링하는 것입니다. Atom 상태를 새로운 쿼리 결과를 독자적인 새로고침 방침에 맞추어 명령적으로(imperatively) 업데이트 할 수 있습니다.
+
+````react
+const userInfoState = atomFamily({
+  key: 'UserInfo',
+  default: userID => fetch(userInfoURL(userID)),
+});
+
+// React component to refresh query
+function RefreshUserInfo({userID}) {
+  const refreshUserInfo = useRecoilCallback(({set}) => async id => {
+    const userInfo = await myDBQuery({userID});
+    set(userInfoState(userID), userInfo);
+  }, [userID]);
+
+  // Refresh user info every second
+  useEffect(() => {
+    const intervalID = setInterval(refreshUserInfo, 1000);
+    return () => clearInterval(intervalID);
+  }, [refreshUserInfo]);
+
+  return null;
+}
+````
+
