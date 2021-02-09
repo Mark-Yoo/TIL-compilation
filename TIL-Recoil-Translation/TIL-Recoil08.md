@@ -388,3 +388,6 @@ function RefreshUserInfo({userID}) {
 }
 ````
 
+이 접근 방법에는 한가지 단점이 있습니다. Atom이 현재 원하는 동작일 경우, 쿼리 새로고침이 보류중인 동안 React Suspense를 자동적으로 활용하기 위해서 Promise를 새 값으로 받아들이는 것을 지원하지 않는다는 점입니다. 그러나 원한다면 로딩 상태와 결과를 수동으로 인코딩 하는 객체를 저장할 수 있습니다.
+
+Atom의 쿼리 동기화를 위해서 [atom effects](https://recoiljs.org/docs/guides/atom-effects)도 고려해볼 수 있습니다.
