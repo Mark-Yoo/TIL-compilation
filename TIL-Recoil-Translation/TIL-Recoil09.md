@@ -71,4 +71,32 @@ const myStateFamily = atomFamily({
 
 ### Compared to React Effects (React Effect와 비교하기)
 
-Atom Effects는 대부분의 경우 리액트의 `useEffect()`로 대체될 수 있습니다. 그러나 atom의 세트는 리액트 컨텍스트의 바깥에서 생성되며, 
+Atom Effects는 대부분의 경우 리액트의 `useEffect()`로 대체될 수 있습니다. 그러나 atom의 집합은 리액트 컨텍스트의 외부에서 생성되며, 특히 동적으로 생성된 atom의 경우 리액트 컴포넌트 내에서 효과를 관리하기 어려울 수 있습니다. 초기 atom 값을 초기화하거나 서버 사이드 렌더링(SSR)과 함께 사용될 수 없습니다. atom effects를 사용하는 것은 effects와 atom 정의를 함께 배치하게 합니다.
+
+```react
+const myState = atom({key: 'Key', default: null});
+
+function MyStateEffect(): React.Node {
+  const [value, setValue] = useRecoilState(myState);
+  useEffect(() => {
+    // Called when the atom value changes
+    store.set(value);
+    store.onChange(setValue);
+    return () => { store.onChange(null); }; // Cleanup effect
+  }, [value]);
+  return null;
+}
+
+function MyApp(): React.Node {
+  return (
+    <div>
+      <MyStateEffect />
+      ...
+    </div>
+  );
+}
+```
+
+### Compared to Snapshots (스냅샵과 비교하기)
+
+Snapshot hooks API도 atom 상태의 변화를 감시할 수 있으며 `<RecoilRoot`의 initializeState prop은 초기 렌더링을 위한 값을 초기화 할 수 있습니다.
