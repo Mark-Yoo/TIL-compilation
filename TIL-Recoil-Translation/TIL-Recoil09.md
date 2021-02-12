@@ -149,3 +149,63 @@ const userInfoState = atomFamily({
 });
 ```
 
+### State Synchronization Example (상태 동기화 예제)
+
+atom을 원격 데이터베이스, 로컬 스토리지 등 처럼 다른 상태의 로컬 캐시 값으로 사용하는 것은 유용할 수 있습니다. store의 값을 얻기위해 `default`프로퍼티와 selector를 이용해 atom의 기본값을 설정해 줄 수 있습니다. 그러나 이는 일회성 조회 일 뿐입니다. store의 값이 변경된다면 atom의 값은 변경되지 않습니다. effects와 함께라면, store가 변경될 때마다  store를 구독하고 atom의 값을 업데이트 할 수 있습니다. effect에서 `setSelf()`를 호출하는 것은 그 값으로 atom을 초기화하고 초기 렌더링에 이용될 것입니다. Atom이 리셋되면, 초기화된 값이 아니라 `default`값으로 돌아갈겁니다.
+
+```react
+const syncStorageEffect = userID => ({setSelf, trigger}) => {
+  // Initialize atom value to the remote storage state
+  if (trigger === 'get') { // Avoid expensive initialization
+    setSelf(myRemoteStorage.get(userID)); // Call synchronously to initialize
+  }
+
+  // Subscribe to remote storage changes and update the atom value
+  myRemoteStorage.onChange(userID, userInfo => {
+    setSelf(userInfo); // Call asynchronously to change value
+  });
+
+  // Cleanup remote storage subscription
+  return () => {
+    myRemoteStorage.onChange(userID, null);
+  };
+};
+
+const userInfoState = atomFamily({
+  key: 'UserInfo',
+  default: null,
+  effects_UNSTABLE: userID => [
+    historyEffect(`${userID} user info`),
+    syncStorageEffect(userID),
+  ],
+});
+```
+
+### Write-Through Cache Example (연속 기입 캐시 예제)
+
+atom 값을 원격 스토리지와 양방향으로 동기화 할 수도 있으므로 서버의 변경점이 atom 값을 업데이트하고, 로컬 atom의 변경점은 서버에 다시 기록합니다. effect는 피드백 루프를 피하기 위해서, 해당 effect의 `setSelf()` 를 통해서 변경될 때 `onSet()`핸들러를 호출하지 않습니다.
+
+```react
+const syncStorageEffect = userID => ({setSelf, onSet, trigger}) => {
+  // Initialize atom value to the remote storage state
+  if (trigger === 'get') { // Avoid expensive initialization
+    setSelf(myRemoteStorage.get(userID)); // Call synchronously to initialize
+  }
+
+  // Subscribe to remote storage changes and update the atom value
+  myRemoteStorage.onChange(userID, userInfo => {
+    setSelf(userInfo); // Call asynchronously to change value
+  });
+
+  // Subscribe to local changes and update the server value
+  onSet(userInfo => {
+    myRemoteStorage.set(userID, userInfo);
+  });
+
+  // Cleanup remote storage subscription
+  return () => {
+    myRemoteStorage.onChange(userID, null);
+  };
+};
+```
+
