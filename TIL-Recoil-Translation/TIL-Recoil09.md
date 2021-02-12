@@ -149,7 +149,7 @@ const userInfoState = atomFamily({
 });
 ```
 
-### State Synchronization Example (상태 동기화 예제)
+## State Synchronization Example (상태 동기화 예제)
 
 atom을 원격 데이터베이스, 로컬 스토리지 등 처럼 다른 상태의 로컬 캐시 값으로 사용하는 것은 유용할 수 있습니다. store의 값을 얻기위해 `default`프로퍼티와 selector를 이용해 atom의 기본값을 설정해 줄 수 있습니다. 그러나 이는 일회성 조회 일 뿐입니다. store의 값이 변경된다면 atom의 값은 변경되지 않습니다. effects와 함께라면, store가 변경될 때마다  store를 구독하고 atom의 값을 업데이트 할 수 있습니다. effect에서 `setSelf()`를 호출하는 것은 그 값으로 atom을 초기화하고 초기 렌더링에 이용될 것입니다. Atom이 리셋되면, 초기화된 값이 아니라 `default`값으로 돌아갈겁니다.
 
@@ -181,7 +181,7 @@ const userInfoState = atomFamily({
 });
 ```
 
-### Write-Through Cache Example (연속 기입 캐시 예제)
+## Write-Through Cache Example (연속 기입 캐시 예제)
 
 atom 값을 원격 스토리지와 양방향으로 동기화 할 수도 있으므로 서버의 변경점이 atom 값을 업데이트하고, 로컬 atom의 변경점은 서버에 다시 기록합니다. effect는 피드백 루프를 피하기 위해서, 해당 effect의 `setSelf()` 를 통해서 변경될 때 `onSet()`핸들러를 호출하지 않습니다.
 
@@ -209,3 +209,43 @@ const syncStorageEffect = userID => ({setSelf, onSet, trigger}) => {
 };
 ```
 
+## Local Storage Persistence (로컬 스토리지 지속성)
+
+Atom Effects는 atom 상태를 브라우저 로컬 스토리지에서 유지하기 위해서 사용될 수 있습니다. 로컬 스토리지는 동기식이므로 데이터를 `async/await` 혹은 `Promise` 없이 직접 받아올 수 있습니다.
+
+다음의 예제 설명을 위해서 단순화 되었으며 모든 케이스를 포함하지는 않습니다.
+
+```react
+const localStorageEffect = key => ({setSelf, onSet}) => {
+  const savedValue = localStorage.getItem(key)
+  if (savedValue != null) {
+    setSelf(JSON.parse(savedValue));
+  }
+
+  onSet(newValue => {
+    if (newValue instanceof DefaultValue) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify(newValue));
+    }
+  });
+};
+
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: 1,
+  effects_UNSTABLE: [
+    localStorageEffect('current_user'),
+  ]
+});
+```
+
+## Asynchronous Storage Persistence (비동기적 스토리지 지속성)
+
+지속되는 데이터는 비동기적으로 돌려받아야 한다면 `setSelf()` 함수에서 Promise를 사용하거나 비동기적으로 호출할 수 있습니다.
+
+아래에서는 `AsyncLocalStorage` 혹은 `localForage`를 비동기 store의 예시로 사용해 볼 보겠습니다.
+
+### Initialize with Promise (Promise로 초기화하기)
+
+Promise와 `setSelf()`를 동기적으로 호출하면,  `<RecoilRoot />` 내부의 구성요소를 `<Suspense />` 구성요소로 감싸 Recoil이 지속 된 값을 로드 할 때까지 기다리는 동안 fallcack을 보여주는 것이 가능합니다. `<Suspense>`는 `setSelf()`에 제공된 `setSelf()`가 resolve 될 때까지 fallback을 보여줍니다.
