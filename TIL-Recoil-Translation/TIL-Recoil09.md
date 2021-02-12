@@ -99,4 +99,53 @@ function MyApp(): React.Node {
 
 ### Compared to Snapshots (스냅샵과 비교하기)
 
-Snapshot hooks API도 atom 상태의 변화를 감시할 수 있으며 `<RecoilRoot`의 initializeState prop은 초기 렌더링을 위한 값을 초기화 할 수 있습니다.
+[Snapshot hooks](https://recoiljs.org/docs/api-reference/core/Snapshot#hooks) API도 atom 상태의 변화를 감시할 수 있으며 [`<RecoilRoot>`](https://recoiljs.org/docs/api-reference/core/RecoilRoot)의 initializeState prop은 초기 렌더링을 위한 값을 초기화 할 수 있습니다. 그러나 이 API들은 모든 상태의 변화를 모니터링하고 동적 atom, 특히 atom family를 관리하는 데에는 어색 할 수 있습니다. Atom Effects를 사용하면 atom 정의와 함께 atom 별로 부수효과가 정의될 수 있으며 여러 정책들을 쉽게 작성할 수 있습니다.
+
+## Logging Example (로깅 예시)
+
+atom effects를 사용하는 간단한 예시는 특정 atom의 상태 변화을 기록하는 것입니다.
+
+```react
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: null,
+  effects_UNSTABLE: [
+    ({onSet}) => {
+      onSet(newID => {
+        console.debug("Current user ID:", newID);
+      });
+    },
+  ],
+});
+```
+
+## History Example (히스토리 예시)
+
+로깅의 더 복잡한 예시는 변화의 히스토리를 유지할 수 있습니다. 이 예시는 특정 변화를 원상태로 되돌리는 콜백 핸들러를 사용하여 상태의 변경 내역 큐를 유지하는 효과를 제공합니다:
+
+```react
+const history: Array<{
+  label: string,
+  undo: () => void,
+}> = [];
+
+const historyEffect = name => ({setSelf, onSet}) => {
+  onSet((newValue, oldValue) => {
+    history.push({
+      label: `${name}: ${JSON.serialize(oldValue)} -> ${JSON.serialize(newValue)}`,
+      undo: () => {
+        setSelf(oldValue);
+      },
+    });
+  });
+};
+
+const userInfoState = atomFamily({
+  key: 'UserInfo',
+  default: null,
+  effects_UNSTABLE: userID => [
+    historyEffect(`${userID} user info`),
+  ],
+});
+```
+
