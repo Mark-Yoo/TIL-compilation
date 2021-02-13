@@ -248,4 +248,164 @@ const currentUserIDState = atom({
 
 ### Initialize with Promise (Promise로 초기화하기)
 
-Promise와 `setSelf()`를 동기적으로 호출하면,  `<RecoilRoot />` 내부의 구성요소를 `<Suspense />` 구성요소로 감싸 Recoil이 지속 된 값을 로드 할 때까지 기다리는 동안 fallcack을 보여주는 것이 가능합니다. `<Suspense>`는 `setSelf()`에 제공된 `setSelf()`가 resolve 될 때까지 fallback을 보여줍니다.
+Promise와 `setSelf()`를 동기적으로 호출하면,  `<RecoilRoot />` 내부의 구성요소를 `<Suspense />` 구성요소로 감싸 Recoil이 지속 된 값을 로드 할 때까지 기다리는 동안 fallcack을 보여주는 것이 가능합니다. `<Suspense>`는 `setSelf()`에 제공된 `setSelf()`가 resolve 될 때까지 fallback을 보여줍니다. Atom이 Promise가 resolve 되기 전에 값으로 설정되면 초기화된 값은 무시됩니다.
+
+나중의 atom들이 "리셋"되면, 초기화된 값이 아니라 기본값으로 되돌아갑니다.
+
+```react
+const localForageEffect = key => ({setSelf, onSet}) => {
+  setSelf(localForage.getItem(key).then(savedValue =>
+    savedValue != null
+      ? JSON.parse(savedValue)
+      : new DefaultValue() // Abort initialization if no value was stored
+  ));
+
+  onSet(newValue => {
+    if (newValue instanceof DefaultValue) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify(newValue));
+    }
+  });
+};
+
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: 1,
+  effects_UNSTABLE: [
+    localForageEffect('current_user'),
+  ]
+});
+```
+
+### Asynchronous setSelf() (비동기 setSefl())
+
+이 접근법으로, 값이 사용 가능할 때 비동기적으로 `setSelf()`를 호출할 수 있습니다. `Promise` 로 초기화하는 것과 달리 atom의 기본값이 처음으로 사용되므로 `<Suspense>`는 atom의 기본이 `Promise`이거나 async selector가 아니라면 fallback을 표시하지 않습니다. 만약 atom이 `setSelf()` 호출 이전에 값으로 설정되면, `setSelf()`로 덮어씌워집니다. 이러한 접근은 `await`에  한정되지만은 않으며 `setTimeout()` 과 같은 `setSelf()`의 어떠한 비동기적 활용을 위한 것입니다.
+
+```react
+const localForageEffect = key => ({setSelf, onSet}) => {
+  /** If there's a persisted value - set it on load  */
+  const loadPersisted = async () => {
+    const savedValue = await localForage.getItem(key);
+
+    if (savedValue != null) {
+      setSelf(JSON.parse(savedValue));
+    }
+  };
+
+  // Load the persisted data
+  loadPersisted();
+
+  onSet(newValue => {
+    if (newValue instanceof DefaultValue) {
+      localForage.removeItem(key);
+    } else {
+      localForage.setItem(key, JSON.stringify(newValue));
+    }
+  });
+};
+
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: 1,
+  effects_UNSTABLE: [
+    localForageEffect('current_user'),
+  ]
+});
+```
+
+## Backward Compatibility (하위 호환성)
+
+만약 atom의 포맷을 바꾼다면 어떻게 될까요? 오래된 포맷을 바탕으로 만든 `localStorage`와  새로운 포맷으로 페이지를 로딩하는 것은 문제를 일으킬 수도 있습니다. effect를 값의 복구와 유효성 검사가 type-safe한 방법으로 빌드할 수도 있습니다:
+
+```react
+type PersistenceOptions<T>: {
+  key: string,
+  restorer: (mixed, DefaultValue) => T | DefaultValue,
+};
+
+const localStorageEffect = <T>(options: PersistenceOptions<T>) => ({setSelf, onSet}) => {
+  const savedValue = localStorage.getItem(options.key)
+  if (savedValue != null) {
+    setSelf(options.restorer(JSON.parse(savedValue), new DefaultValue()));
+  }
+
+  onSet(newValue => {
+    if (newValue instanceof DefaultValue) {
+      localStorage.removeItem(options.key);
+    } else {
+      localStorage.setItem(options.key, JSON.stringify(newValue));
+    }
+  });
+};
+
+const currentUserIDState = atom<number>({
+  key: 'CurrentUserID',
+  default: 1,
+  effects_UNSTABLE: [
+    localStorageEffect({
+      key: 'current_user',
+      restorer: (value, defaultValue) =>
+        // values are currently persisted as numbers
+        typeof value === 'number'
+          ? value
+          // if value was previously persisted as a string, parse it to a number
+          : typeof value === 'string'
+          ? parseInt(value, 10)
+          // if type of value is not recognized, then use the atom's default value.
+          : defaultValue
+    }),
+  ],
+});
+```
+
+만약 키가 값의 변경을 지속하기 위해서 사용되거나, 하나의 키만으로 지속성을 유지하던 값이 이제는 여러개의 키를 사용한다면 어떨까요? 아니면 그 반대는요? 이러한 부분들도 type-safe한 방법으로 다룰 수 있습니다:
+
+```react
+type PersistenceOptions<T>: {
+  key: string,
+  restorer: (mixed, DefaultValue, Map<string, mixed>) => T | DefaultValue,
+};
+
+const localStorageEffect = <T>(options: PersistenceOptions<T>) => ({setSelf, onSet}) => {
+  const savedValues = parseValuesFromStorage(localStorage);
+  const savedValue = savedValues.get(options.key);
+  setSelf(
+    options.restorer(savedValue ?? new DefaultValue(), new DefaultValue(), savedValues),
+  );
+
+  onSet(newValue => {
+    if (newValue instanceof DefaultValue) {
+      localStorage.removeItem(options.key);
+    } else {
+      localStorage.setItem(options.key, JSON.stringify(newValue));
+    }
+  });
+};
+
+const currentUserIDState = atom<number>({
+  key: 'CurrentUserID',
+  default: 1,
+  effects_UNSTABLE: [
+    localStorageEffect({
+      key: 'current_user',
+      restorer: (value, defaultValue, values) => {
+        if (typeof value === 'number') {
+          return value;
+        }
+
+        const oldValue = values.get('old_key');
+        if (typeof oldValue === 'number') {
+          return oldValue;
+        }
+
+        return defaultValue;
+      },
+    }),
+  ],
+});
+```
+
+## Browser URL History Persistence (브라우저 URL 히스토리 지속성)
+
+Atom 상태는 브라우저 URL 히스토리로 지속되고 동기화 될 수 있습니다. 상태의 변경이 현재의 URL을 업데이트하여 저장하거나 다른 사람들과 공유하여 해당하는 상태를 복원하는데에 유용할 수 있습니다. 브라우저 히스토리와 통합하여 브라우저의 앞으로/뒤로 버튼들에 영향을 줄 수 있습니다. 이러한 타입의 지속성을 제공하는 예제나 라이브러리를 곧 제공될 예정입니다.
