@@ -62,3 +62,34 @@ function DebugButton(): React.Node {
 ## Time Travel
 
 [`useGotoRecoilSnapshot()`](https://recoiljs.org/docs/api-reference/core/useGotoRecoilSnapshot) hook을 사용하여 제공된 `Snapshot`과 매치되도록 전체 Recoil 상태를 업데이트 할 수 있습니다. 이 예제는 이전의 전역 상태로 돌아가 복구하는 능력을 이용해 상태 변경 히스토리를 유지합니다
+
+Snapshot은 `getID()` 메서드도 제공합니다. `getID()`는 `snapshot` 히스토리의 업데이트를 막기 위해 이전에 알려진 상태로 되돌아가는지 알아내는데에 도움을 줍니다.
+
+```react
+function TimeTravelObserver() {
+  const [snapshots, setSnapshots] = useState([]);
+
+  const snapshot = useRecoilSnapshot();
+  useEffect(() => {
+    if (snapshots.every(s => s.getID() !== snapshot.getID())) {
+      setSnapshots([...snapshots, snapshot]);
+    }
+  }, [snapshot]);
+
+  const gotoSnapshot = useGotoRecoilSnapshot();
+
+  return (
+    <ol>
+      {snapshots.map((snapshot, i) => (
+        <li key={i}>
+          Snapshot {i}
+          <button onClick={() => gotoSnapshot(snapshot)}>
+            Restore
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+```
+
