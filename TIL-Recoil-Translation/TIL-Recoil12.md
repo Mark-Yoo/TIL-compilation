@@ -11,3 +11,19 @@ atom이 값을 갖는 컨텍스트를 제공합니다. Recoil hooks를 사용하
 
 ---
 
+`<RecoilRoot>`는 atom 상태의 독립 providers/stores를 나타냅니다. selector 캐시와 같은 캐시는 root 사이에 공유될 수 있습니다. Selector 평가는 캐싱 혹은 로깅을 제외하고 멱등해야하므로 이는 문제가 되지는 않습니다. 하지만 관찰이 가능하거나 중복되는 쿼리가 root를 걸쳐 캐시 될 수 있습니다.
+
+### Example
+
+```react
+import {RecoilRoot} from 'recoil';
+
+function AppRoot() {
+  return (
+    <RecoilRoot>
+      <ComponentThatUsesRecoil />
+    </RecoilRoot>
+  );
+}
+```
+
