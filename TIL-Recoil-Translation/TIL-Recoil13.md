@@ -28,3 +28,37 @@ Recoil은 atom 상태의 변화를 관리하여 그 atom을 구독하는 컴포�
 
 - `useRecoilState()`: 이 hook은 atom을 읽고 쓰기를 모두 가능하게하고자 사용됩니다. 이 hook은 컴포넌트를 atom에 구독시킵니다.
 - `useRecoilValue()`: 이 hook은 atom을 읽기만 가능하게 만들 때에 사용됩니다. 이 hook은 컴포넌트를 atom에 구독시킵니다.
+
+- `useSetRecoilState()`: 이 hook은 atom에 쓰기만 가능하게 만들 때에 사용됩니다.
+- `useResetRecoilState()`: 이 hook은 atom을 기본값으로 리셋할 때에 사용합니다.
+
+컴포넌트를 구독하지 않은 상태에서 atom의 값을 읽어야하는 희귀한 케이스의 경우 `useRecoilCallback()`을 확인하십시오.
+
+atom은 같은 타입의 값을 대표하는 정적 값이나 Promise, 혹은 RecoilValue로 초기화 할 수 있습니다. Promise가 보류중이거나 기본 selector가 비동기일 수 있기 때문에, atom 값 또한 보류중이거나 읽는 중 에러를 발생시켰을 수 있음을 의미합니다. 현재 Atom을 세팅할 때에 Promise를 할당 할 수 없습니다. 비동기 함수에는 selectors를 사용하십시오.
+
+Atom은 Promise 혹은 RecoilValue를 직접 저장하는데에 사용할 수 없습니다. 하지만 객체에 래핑될 수는 있습니다. Promise가 변경가능(mutable)할 수 있다는 것을 기억하십시오. Atom은 순수하기만 하다면 함수에 세팅될 수 있지만 이를 위해서 setter의 updater form을 사용해야 할 수도 있습니다. (예. set(myAtom, () => myFunc);).
+
+### Example
+
+```react
+import {atom, useRecoilState} from 'recoil';
+
+const counter = atom({
+  key: 'myCounter',
+  default: 0,
+});
+
+function Counter() {
+  const [count, setCount] = useRecoilState(counter);
+  const incrementByOne = () => setCount(count + 1);
+
+  return (
+    <div>
+      Count: {count}
+      <br />
+      <button onClick={incrementByOne}>Increment</button>
+    </div>
+  );
+}
+```
+
