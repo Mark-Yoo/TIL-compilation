@@ -34,3 +34,5 @@ function atomFamily<T, Parameter>({
 
 atom은 Recoil에 포함된 상태 조각을 나타냅니다. atom은 앱에 의해서 `<RecoilRoot>`마다 생성되고 등록됩니다. 하지만 만약 상태가 전역이 아니라면 어떻게 될까요? 상태가 컨트롤의 특정 인스턴스 혹은 특정 요소와 연결되어 있다면 어떻게 될까요? 예를 들어 앱이 동적으로 요소를 추가할 수 있고 각 요소가 위치와 같은 상태를 갖는 UI 프로토타이핑 도구일수도 있습니다. 이상적으로 각 요소는 요소만의 상태의 atom을 갖게 됩니다. Memoization 패턴을 통해 직접 실행할 수 있지만, Recoil이 이러한 패턴을 atomFamily 유틸리티와 함께 제공합니다. Atom Family는 atom의 모음을 나타냅니다. atomFamily를 호출하면 넘겨준 매개변수를 바탕으로  RecoilState atom을 제공하는 함수를 반환합니다.
 
+
+
