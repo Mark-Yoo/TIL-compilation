@@ -45,3 +45,9 @@ console.log(iter2.next());
 console.log(iter2.next());
 console.log(iter2.next());
 console.log(iter2.next());
+
+// 3번 예제
+
+console.log([...oddNum(10)]);
+const [first, ...rest] = oddNum(20);
+console.log("first", first, "rest", rest);
