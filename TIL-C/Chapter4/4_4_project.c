@@ -29,6 +29,7 @@ int main(void) {
         }
 
         if (chanceCount == 0) {
+            printf("The answer was %d\n", answer);
             printf("You've used all of your chances! Better luck next time!\n");
             printf("Game Over\n");
             break;
