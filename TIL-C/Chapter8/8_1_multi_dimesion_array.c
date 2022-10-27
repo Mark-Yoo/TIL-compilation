@@ -1,12 +1,17 @@
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 
 int arrayAnimal[4][5];
 char * strAnimal[10];
 
 void initAnimalArray(void);
 void initAnimalName(void);
+void shuffleAnimal(void);
+int getEmptyPosition(void);
 
 int main(void) {
+    srand(time(NULL));
     initAnimalArray();
     initAnimalName();
     return 0;
@@ -31,4 +36,28 @@ void initAnimalName(void) {
     strAnimal[7] = "낙타";
     strAnimal[8] = "타조";
     strAnimal[9] = "호랑이";
+}
+
+void shuffleAnimal(void) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 2; j++) {
+            int pos = getEmptyPosition();
+            int x = convert_pos_x(pos);
+            int y = convert_pos_y(pos);
+            arrayAnimal[x][y] = i;
+        }
+    }
+}
+
+int getEmptyPosition() {
+    while (1) {
+        int randomPos = rand() % 20;
+        int x = convert_pos_x(randomPos);
+        int y = convert_pos_y(randomPos);
+
+        if (arrayAnimal[x][y] == -1) {
+            return randomPos;
+        }
+    }
+    return 0;
 }
