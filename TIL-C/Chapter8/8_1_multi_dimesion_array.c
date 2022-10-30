@@ -9,6 +9,9 @@ void initAnimalArray(void);
 void initAnimalName(void);
 void shuffleAnimal(void);
 int getEmptyPosition(void);
+int convert_pos_x(int x);
+int convert_pos_y(int y);
+void printAnimals(void);
 
 int main(void) {
     srand(time(NULL));
@@ -60,4 +63,23 @@ int getEmptyPosition() {
         }
     }
     return 0;
+}
+
+int convert_pos_x(int x) {
+    return x / 5;
+}
+
+int convert_pos_y(int y) {
+    return y % 5;
+}
+
+void printAnimals() {
+    printf("\n===== 동물 위치. =====\n\n");
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 5; j++) {
+            printf("%8s", strAnimal[arrayAnimal[i][j]]);
+        }
+        printf("\n");
+    }
 }
