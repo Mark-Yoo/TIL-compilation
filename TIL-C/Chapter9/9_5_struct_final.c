@@ -12,10 +12,19 @@ typedef struct {
 CAT cats[5];
 int collections[5] = { 0, 0, 0, 0, 0 };
 
-void initCats();
+void initCats(void);
+void printCat(int selected);
 
 int main(void) {
+    srand(time(NULL));
     initCats();
+
+    while (1) {
+        printf("어떤 고양이가 나올까요? \n Press Enter to Find out!");
+
+        getchar();
+        int selected = rand() % 5;
+    }
     return 0;
 }
 
@@ -40,4 +49,12 @@ void initCats(void) {
     cats[4].age = 2;
     cats[4].character = "호기로움";
     cats[4].level = 5;
+}
+
+void printCat(int selected) {
+    printf("");
+    printf("");
+    printf("");
+    printf("");
+    printf("");
 }
