@@ -52,9 +52,15 @@ void initCats(void) {
 }
 
 void printCat(int selected) {
-    printf("");
-    printf("");
-    printf("");
-    printf("");
-    printf("");
+    printf("\n\n == 다음 고양이의 주인이 되었습니다! ==");
+    printf(" 이름 : %s\n", cats[selected].name);
+    printf(" 나이 : %s\n", cats[selected].age);
+    printf(" 특징 : %s\n", cats[selected].character);
+    printf(" 레벨 : %s\n", cats[selected].level);
+
+    for (int i = 0; i < cats[selected].level; i++) {
+        printf("%s", "*");
+    }
+
+    printf("\n\n");
 }
