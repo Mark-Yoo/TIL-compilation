@@ -14,6 +14,7 @@ int collections[5] = { 0, 0, 0, 0, 0 };
 
 void initCats(void);
 void printCat(int selected);
+int checkCollection(void);
 
 int main(void) {
     srand(time(NULL));
@@ -63,4 +64,16 @@ void printCat(int selected) {
     }
 
     printf("\n\n");
+}
+
+int checkCollection() {
+    printf("\n\n === 보유 고양이 목록 === \n\n");
+    for (int i = 0; i < 5; i++) {
+        if (collections[i] == 0) {
+            printf("%10s", "(빈 상자)");
+        } else {
+            printf("%10s", cats[i].name);
+        }
+    }
+    printf("\n===========\n\n");
 }
