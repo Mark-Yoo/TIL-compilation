@@ -22,9 +22,16 @@ int main(void) {
 
     while (1) {
         printf("어떤 고양이가 나올까요? \n Press Enter to Find out!");
-
         getchar();
+
         int selected = rand() % 5;
+        printCat(selected);
+
+        collections[selected] = 1;
+        int collectAll = checkCollection();
+        if(collectAll == 1) {
+            break;
+        }
     }
     return 0;
 }
@@ -67,13 +74,19 @@ void printCat(int selected) {
 }
 
 int checkCollection() {
+    int collectAll = 1;
     printf("\n\n === 보유 고양이 목록 === \n\n");
     for (int i = 0; i < 5; i++) {
         if (collections[i] == 0) {
             printf("%10s", "(빈 상자)");
+            collectAll = 0;
         } else {
             printf("%10s", cats[i].name);
         }
     }
     printf("\n===========\n\n");
+    if (collectAll) {
+        printf("\n\n축하합니다! 고양이 5마리를 모두 모았습니다!\n\n");
+    }
+    return collectAll;
 }
