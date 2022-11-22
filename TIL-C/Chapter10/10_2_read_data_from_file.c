@@ -4,13 +4,13 @@
 
 int main(void) {
     char line[MAX];
-    FILE * file = fopen("c:\\Users\\사용자계절\\test1.txt", "rb");
-    if (file = NULL) {
+    FILE * file = fopen("사용자 경로", "rb");
+    if (file == NULL) {
         printf("파일 열기 실패\n");
         return 1;
     }
 
-    while ((fgets, MAX, file) != NULL) {
+    while (fgets(line, MAX, file) != NULL) {
         printf("%s", line);
     }
 
