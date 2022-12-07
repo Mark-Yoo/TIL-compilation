@@ -21,3 +21,11 @@ print(spending_year[-1])
 
 print('-3rd item from spending_year list')
 print(spending_year[-3])
+
+food = ['피자', '스테이크', '치킨', '된장찌개', '김치찌개']
+search = input('찾고 계신 음식을 입력해주세요')
+
+if search in food:
+    print(food.index(search) + 1, '위입니다.')
+else:
+    print(search, '은/는 순위에 없습니다.')
