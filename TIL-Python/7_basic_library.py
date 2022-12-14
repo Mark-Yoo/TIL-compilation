@@ -20,3 +20,8 @@ plt.title('Monthly Sales')
 # plt.bar(range(3, 8), sales, color='b')
 plt.barh(range(3, 8), sales, color='b')
 plt.show()
+
+b_type = [20, 21, 39, 11]
+b_type_name = ['A-type', 'B-type', 'O-type', 'AB-type']
+plt.pie(b_type, labels=b_type_name, autopct='%1.1f%%')
+plt.show()
