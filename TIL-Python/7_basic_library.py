@@ -25,3 +25,10 @@ b_type = [20, 21, 39, 11]
 b_type_name = ['A-type', 'B-type', 'O-type', 'AB-type']
 plt.pie(b_type, labels=b_type_name, autopct='%1.1f%%')
 plt.show()
+
+mathScore = [80, 20, 50, 20, 10, 50, 60, 30, 60]
+engScore = [90, 40, 60, 40, 10, 30, 50, 70, 90]
+plt.scatter(mathScore, engScore, color='red', alpha=0.5)
+plt.xlabel('Math Score')
+plt.ylabel('English Score')
+plt.show()
