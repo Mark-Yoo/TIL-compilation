@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import random
+
 plt.plot([1, 5, 7, 3, 7])
 plt.show()
 
@@ -26,9 +28,21 @@ b_type_name = ['A-type', 'B-type', 'O-type', 'AB-type']
 plt.pie(b_type, labels=b_type_name, autopct='%1.1f%%')
 plt.show()
 
+# basic scatter plot with python
 mathScore = [80, 20, 50, 20, 10, 50, 60, 30, 60]
 engScore = [90, 40, 60, 40, 10, 30, 50, 70, 90]
 plt.scatter(mathScore, engScore, color='red', alpha=0.5)
 plt.xlabel('Math Score')
 plt.ylabel('English Score')
+plt.show()
+
+# scatter plot with colormap
+height, weight = [], []
+for i in range(100):
+    height.append(random.randint(100, 200))
+    weight.append(random.randint(20, 100))
+plt.title('Corelation among height and weight')
+plt.scatter(height, weight, c=height, cmap='RdPu')
+plt.xlabel('height')
+plt.ylabel('weight')
 plt.show()
