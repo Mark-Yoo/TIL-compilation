@@ -46,3 +46,12 @@ plt.scatter(height, weight, c=height, cmap='RdPu')
 plt.xlabel('height')
 plt.ylabel('weight')
 plt.show()
+
+singer = ['A', 'B', 'C', 'D', 'E']
+week1 = [42, 50, 10, 92, 86]
+week2 = [52, 50, 13, 65, 72]
+plt.title('Total vote from each week')
+plt.plot(singer, week1)
+plt.plot(singer, week2)
+plt.legend()
+plt.show()
