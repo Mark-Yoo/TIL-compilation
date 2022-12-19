@@ -55,3 +55,15 @@ plt.plot(singer, week1)
 plt.plot(singer, week2)
 plt.legend()
 plt.show()
+
+height1, weight2, score = [], [], []
+for i in range(100):
+    height1.append(random.randint(100, 200))
+    weight2.append(random.randint(20, 100))
+    score.append(random.randint(1, 1000))
+plt.title('Relation in between height and weight')
+plt.scatter(height1, weight2, s=score, c=score, cmap='rainbow', alpha=0.6)
+plt.xlabel('height')
+plt.ylabel('weight')
+plt.colorbar(label='physical education score')
+plt.show()
