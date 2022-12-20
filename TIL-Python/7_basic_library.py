@@ -67,3 +67,14 @@ plt.xlabel('height')
 plt.ylabel('weight')
 plt.colorbar(label='physical education score')
 plt.show()
+
+employee = ['a', 'b', 'c']
+incentive2018 = [50, 90, 32]
+incentive2019 = [20, 65, 92]
+
+plt.title('Employee additionally paid')
+plt.bar(range(1, 8, 3), incentive2018, label='2018')
+plt.bar(range(2, 9, 3), incentive2019, lable='2019')
+plt.xticks(range(1, 8, 3), employee)
+plt.legend()
+plt.show()
