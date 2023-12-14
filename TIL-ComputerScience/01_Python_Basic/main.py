@@ -28,4 +28,7 @@ b = [1, 2, 3, 4]
 # Combine two lists into one
 # a.extend(b)
 
+# Return new sorted list based on previous list(arg)
+# print(sorted(a))
+
 print(a)
