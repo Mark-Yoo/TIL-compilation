@@ -10,6 +10,9 @@ class TestClass:
     def get_name(self):
         print("My name is", self.name)
 
+    def __del__(self):
+        print("Into the dust")
+
 
 test = TestClass("Peter", 185, 25)
 test.get_age()
