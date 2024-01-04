@@ -38,6 +38,18 @@ class Test4(TestAbstract):
     def test4(self):
         print("this is test4 which is from test4")
 
+# Way to handle error in python use 'try & except' statement
+try:
+    print("how to handle error in python")
+    raise Exception("in this way, you can raise error intentionally")
+except Exception as e:
+    print("this is how")
+
+# another way to make error use assert statement
+a = 3
+b = 1
+assert a > b, print("this is how to make error with asset statement")
+
 
 nameGenerator = B()
 nameGenerator.test1()
