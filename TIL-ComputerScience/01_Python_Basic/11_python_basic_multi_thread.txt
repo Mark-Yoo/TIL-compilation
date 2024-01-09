@@ -1,0 +1,25 @@
+# Python is locked with GIL(Global Interpreter Lock) policy, so it cannot be fully used in multi-thread
+
+
+from threading import Thread
+import time
+
+def work(word_id, start, end, result):
+    total = 0
+    for i in range(start, end):
+        total += i
+    result.append(total)
+
+if __name__ == "__main__":
+    start = time.time()
+    result = []
+    th1 = Thread(target=work, args=(1, 0, 10000, result))
+    th2 = Thread(target=work, args=(2, 10001, 20000, result))
+
+    th1.start()
+    th2.start()
+    th1.join() # join method put thread1 to stop working
+    th2.join()
+
+print(result)
+print(time.time() - start)
